@@ -13,12 +13,13 @@ import 'dotenv/config';
 import oracledb from 'oracledb';
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 
-// Capsule pipeline name → where it lands in Hadya CRM. Pipelines not listed (HOMCO Sales, AFCO) are skipped.
+// Capsule pipeline name → where it lands in Hadya CRM. Pipelines not listed (e.g. AFCO) are skipped.
 const PIPELINES = {
   'JS Lease Pipeline':          { entity: 'JS',  pipeline: 'lease',  category: 'Office' },
   'JS Retail Pipeline':         { entity: 'JS',  pipeline: 'retail', category: 'Retail' },
   'Residential Lease Pipeline': { entity: 'SLO', pipeline: 'lease',  category: 'Apartment' },
   'Gravita Lease Pipeline':     { entity: 'GRV', pipeline: 'lease',  category: null },
+  'HOMCO Sales':                { entity: 'HMC', pipeline: 'sales',  category: null },
 };
 const API = 'https://api.capsulecrm.com/api/v2';
 const ACTIVITY_TYPES = new Set(['call', 'email', 'meeting', 'note', 'task', 'whatsapp', 'visit']);
@@ -170,8 +171,14 @@ async function main() {
     connectTimeout: 20,
   });
   try {
-    const { rows: ents } = await conn.execute(`SELECT code, id FROM entities WHERE code IN ('JS','SLO','GRV')`);
+    // Every entity any pipeline maps to (JS, SLO, GRV, HMC, …) — not a hard-coded list.
+    const wanted = [...new Set(Object.values(PIPELINES).map((x) => x.entity))];
+    const { rows: ents } = await conn.execute(
+      `SELECT code, id FROM entities WHERE code IN (${wanted.map((_, i) => `:c${i}`).join(',')})`,
+      Object.fromEntries(wanted.map((c, i) => [`c${i}`, c])),
+    );
     const entityId = Object.fromEntries(ents);
+    for (const c of wanted) if (!entityId[c]) throw new Error(`Entity ${c} not found in Hadya CRM — run db/05_entities.sql first.`);
     const { rows: stRows } = await conn.execute(
       `SELECT entity_id, pipeline_code, LOWER(name), id FROM entity_stages WHERE active = 1 AND pipeline_code <> 'default'`);
     const stageId = new Map(stRows.map(([e, p, n, id]) => [`${e}|${p}|${n}`, id]));

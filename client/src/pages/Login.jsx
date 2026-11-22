@@ -80,6 +80,7 @@ export default function Login() {
       <div className="relative mx-auto grid min-h-dvh max-w-7xl grid-cols-1 items-center gap-10 px-5 py-10 lg:grid-cols-2 lg:gap-16 lg:px-10">
         {/* Showcase (desktop/tablet) */}
         <section className="hidden lg:block" aria-label="About Hadya CRM">
+          <img src="/hadya-logo.png" alt="Hadya" className="mb-6 h-9 w-auto rounded-lg bg-white/95 px-3 py-2 motion-safe:animate-fade-up" />
           <p className="inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-xs font-medium text-slate-300 ring-1 ring-white/10 motion-safe:animate-fade-up">
             <span className="relative flex size-2"><span className="absolute inline-flex size-full rounded-full bg-emerald-400 opacity-75 motion-safe:animate-ping" /><span className="relative inline-flex size-2 rounded-full bg-emerald-400" /></span>
             Hadya Group · {year}
@@ -125,7 +126,7 @@ export default function Login() {
           <div className="relative rounded-3xl bg-gradient-to-b from-white/20 via-white/5 to-white/10 p-px shadow-2xl shadow-black/40">
             <div className="rounded-3xl bg-slate-900/80 px-6 py-8 backdrop-blur-2xl sm:px-10 sm:py-12">
               <div className="flex flex-col items-center text-center">
-                <span className="grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-amber-300 to-amber-500 font-serif text-xl font-black text-slate-900 shadow-lg shadow-amber-500/30 motion-safe:animate-float">HC</span>
+                <span className="grid place-items-center rounded-2xl bg-white px-5 py-3 shadow-lg shadow-black/30 motion-safe:animate-float"><img src="/hadya-logo.png" alt="Hadya" className="h-10 w-auto" /></span>
                 <p className="mt-4 text-xs font-bold tracking-[0.25em] text-amber-300 uppercase">Hadya Group</p>
                 <h2 className="mt-1 text-3xl font-black tracking-tight">Hadya CRM</h2>
                 <p className="mt-2 text-sm text-slate-400">Sign in with your company Microsoft account</p>

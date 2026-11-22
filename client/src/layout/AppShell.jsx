@@ -25,12 +25,8 @@ function Sidebar() {
   return (
     <div className="flex h-full flex-col bg-white">
       {/* Logo */}
-      <div className="flex items-center gap-2.5 border-b border-pv-border px-4 py-3.5">
-        <span className="grid size-[34px] shrink-0 place-items-center rounded-lg bg-pv-navy font-serif text-[13px] font-extrabold text-pv-sand">HC</span>
-        <div>
-          <p className="text-[10px] font-bold tracking-[.12em] text-pv-text4 uppercase">Hadya Group</p>
-          <p className="font-serif text-sm font-extrabold tracking-[-.01em] text-pv-navy">Hadya CRM</p>
-        </div>
+      <div className="flex items-center justify-center border-b border-pv-border px-4 py-4">
+        <img src="/hadya-logo.png" alt="Hadya" className="h-14 w-auto" />
       </div>
 
       <nav className="flex flex-1 flex-col overflow-y-auto" aria-label="Main">
