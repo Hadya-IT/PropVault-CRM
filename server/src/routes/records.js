@@ -4,7 +4,7 @@ import { ah, badRequest, conflict, notFound } from '../lib/errors.js';
 import { query, tx, oracledb } from '../db.js';
 import { requireModule } from '../middleware/auth.js';
 import { MODULES, dataModuleFor } from '../modules/registry.js';
-import { parseBody, buildList, buildGet, buildInsert, buildUpdate, buildSoftDelete, buildFacet, fromRow } from '../modules/sql.js';
+import { parseBody, buildList, buildGet, buildInsert, buildUpdate, buildSoftDelete, buildFacet, buildStats, fromRow } from '../modules/sql.js';
 import { writeAudit } from '../lib/repo.js';
 
 const REF_TABLES = { contacts: 'contacts', units: 'units', leads: 'leads', deals: 'deals' };
@@ -94,6 +94,24 @@ export function recordRoutes() {
       facets[column] = Object.fromEntries(r2.rows.map((x) => [x.val ?? '—', Number(x.cnt)]));
     }
     res.json({ data: rows.map((row) => fromRow(def, row)), page, pageSize, total, facets });
+  }));
+
+  // Scalar aggregates (count, money sums, avg score) + status/type breakdowns, for module KPI headers.
+  r.get('/stats', requireModule('view'), ah(async (req, res) => {
+    const def = defFor(req);
+    const fixed = req.entityModule.filter;
+    const s = buildStats(def, { entityId: req.entity.id, fixed });
+    const { rows } = await query(s.sql, s.binds);
+    const row = rows[0] || {};
+    const sums = {}; for (const n of s.sums) sums[n] = Number(row[`sum_${n}`] ?? 0);
+    const groups = {};
+    for (const [name, col] of Object.entries(def.columns)) {
+      if (!col.filter || !col.enum) continue;
+      const f = buildFacet(def, { entityId: req.entity.id, fixed, column: name });
+      const r2 = await query(f.sql, f.binds);
+      groups[name] = Object.fromEntries(r2.rows.map((x) => [x.val ?? '—', Number(x.cnt)]));
+    }
+    res.json({ total: Number(row.cnt ?? 0), sums, avgScore: row.avg_score ?? null, groups });
   }));
 
   r.get('/:id', requireModule('view'), ah(async (req, res) => {

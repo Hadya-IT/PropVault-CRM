@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { api, qs } from '../lib/api';
 import { useUI } from '../store/ui';
 import { color } from '../lib/colors';
-import { Badge, Button, Card, Empty, Field, Input, Kpi, Modal, PageHeader, SegTabs, Select, Spinner, Textarea, Toggle, cx, toneOf } from '../components/ui';
+import { Badge, Bar, Button, Card, Empty, Field, Input, Kpi, Modal, PageHeader, SegTabs, Select, Spinner, Textarea, Toggle, cx, toneOf } from '../components/ui';
 
 const fmtMoney = (v) => (v == null ? '—' : `SAR ${Number(v).toLocaleString('en-US', { maximumFractionDigits: 0 })}`);
 const fmtDate = (v) => (v ? String(v).slice(0, 10) : '—');
@@ -32,6 +32,91 @@ export function useRecords(base, { pageSize = 25, facets, filter } = {}) {
 
   useEffect(() => { load(); }, [load]);
   return { ...state, params, setParams, reload: load, pageSize };
+}
+
+/** Scalar aggregates for the module KPI header. Refetched whenever `key` changes (e.g. after a save). */
+function useStats(base, key) {
+  const [stats, setStats] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    api.get(`${base}/stats`).then((s) => alive && setStats(s)).catch(() => alive && setStats(null));
+    return () => { alive = false; };
+  }, [base, key]);
+  return stats;
+}
+
+const g = (st, grp, k) => st?.groups?.[grp]?.[k] ?? 0;
+
+/** Per-module KPI header: all figures are accurate totals from /stats, not the current page. */
+function moduleKpis(module, st) {
+  if (!st) return null;
+  switch (module) {
+    case 'cx': return [
+      { label: 'Total Feedback', value: st.total, sub: 'All types', tone: 'blue' },
+      { label: 'Avg NPS', value: st.avgScore ?? '—', sub: 'Net Promoter', tone: 'green' },
+      { label: 'Complaints', value: g(st, 'feedback_type', 'Complaint'), sub: 'Needs attention', tone: g(st, 'feedback_type', 'Complaint') ? 'red' : 'green' },
+      { label: 'Open Issues', value: g(st, 'status', 'Open'), sub: 'Unresolved', tone: g(st, 'status', 'Open') ? 'orange' : 'green' },
+    ];
+    case 'deals': return [
+      { label: 'Total Deals', value: st.total, sub: 'All deals', tone: 'blue' },
+      { label: 'Pipeline Value', value: fmtMoney(st.sums?.amount), sub: 'Sum of amounts', tone: 'gold' },
+      { label: 'Active', value: g(st, 'status', 'Active'), sub: 'In progress', tone: 'orange' },
+      { label: 'Won', value: g(st, 'status', 'Won'), sub: 'Closed won', tone: 'green' },
+    ];
+    case 'maintenance': return [
+      { label: 'Total Requests', value: st.total, sub: 'All time', tone: 'blue' },
+      { label: 'Open', value: g(st, 'status', 'Open'), sub: 'Not started', tone: g(st, 'status', 'Open') ? 'orange' : 'green' },
+      { label: 'In Progress', value: g(st, 'status', 'In Progress'), sub: 'Being worked', tone: 'purple' },
+      { label: 'Urgent', value: g(st, 'priority', 'Urgent'), sub: 'High priority', tone: g(st, 'priority', 'Urgent') ? 'red' : 'green' },
+    ];
+    case 'customers': return [
+      { label: 'Members', value: st.total, sub: 'All members', tone: 'blue' },
+      { label: 'Active', value: g(st, 'status', 'Active'), sub: 'Paying', tone: 'green' },
+      { label: 'MRR', value: fmtMoney(st.sums?.mrr_amount), sub: 'Monthly recurring', tone: 'gold' },
+      { label: 'Churned', value: g(st, 'status', 'Churned'), sub: 'Lost', tone: g(st, 'status', 'Churned') ? 'red' : 'green' },
+    ];
+    case 'bookings': return [
+      { label: 'Bookings', value: st.total, sub: 'All time', tone: 'blue' },
+      { label: 'Confirmed', value: g(st, 'status', 'Confirmed'), sub: 'Locked in', tone: 'green' },
+      { label: 'Pending', value: g(st, 'status', 'Pending'), sub: 'Awaiting', tone: 'orange' },
+      { label: 'Revenue', value: fmtMoney(st.sums?.total_amount), sub: 'Booked value', tone: 'gold' },
+    ];
+    case 'events': return [
+      { label: 'Events', value: st.total, sub: 'All events', tone: 'blue' },
+      { label: 'Upcoming', value: g(st, 'status', 'Upcoming'), sub: 'Scheduled', tone: 'orange' },
+      { label: 'Completed', value: g(st, 'status', 'Completed'), sub: 'Done', tone: 'green' },
+      { label: 'Cancelled', value: g(st, 'status', 'Cancelled'), sub: 'Called off', tone: g(st, 'status', 'Cancelled') ? 'red' : 'purple' },
+    ];
+    default: return null;
+  }
+}
+
+const feedbackTone = (s) => (s >= 8 ? 'green' : s >= 6 ? 'gold' : s >= 4 ? 'orange' : 'red');
+
+/** Prototype CX feedback card. */
+function FeedbackCard({ f, onOpen, canEdit, meta }) {
+  const sc = toneOf({ green: 'active', gold: 'pending', orange: 'pending', red: 'lost' }[feedbackTone(f.score)]);
+  const assignee = meta.users.find((u) => u.id === f.assignee_id)?.name;
+  return (
+    <button type="button" disabled={!canEdit} onClick={onOpen}
+      className={cx('block w-full rounded-xl border-[1.5px] border-l-4 bg-white p-3.5 text-left shadow-pv-sm transition hover:shadow-pv-md disabled:cursor-default', sc.border)}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="truncate text-[13px] font-bold text-pv-text">{f.customer_name || 'Anonymous'}</p>
+          <p className="text-[11px] text-pv-text4">{fmtDate(f.created_at)}</p>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          {f.feedback_type && <Badge status={f.feedback_type}>{f.feedback_type}</Badge>}
+          {f.score != null && <span className={cx('text-lg font-extrabold', sc.text)}>{f.score}{f.feedback_type === 'NPS' ? '/10' : ''}</span>}
+        </div>
+      </div>
+      {f.comments && <p className="mt-2 line-clamp-3 text-xs text-pv-text2 italic">“{f.comments}”</p>}
+      <div className="mt-2 flex items-center justify-between gap-2">
+        <span className="truncate text-[11px] text-pv-text4">{assignee ? `Assigned: ${assignee}` : f.category || ''}</span>
+        {f.status && <Badge status={f.status}>{f.status}</Badge>}
+      </div>
+    </button>
+  );
 }
 
 function Cell({ col, row, meta }) {
@@ -141,11 +226,15 @@ export default function RecordsView({ entity, mod, def, meta }) {
   const isUnits = mod.module === 'units';
   const isLeads = mod.module === 'leads';
   const facetCols = isLeads ? 'stage_id,category' : def.columns.some((c) => c.key === 'status') || def.form.some((f) => f.key === 'status') ? 'status' : undefined;
-  const rec = useRecords(base, { pageSize: isUnits ? 24 : 25, facets: facetCols });
+  const isCx = mod.module === 'cx';
+  const rec = useRecords(base, { pageSize: isUnits ? 24 : isCx ? 12 : 25, facets: facetCols });
   const notify = useUI((s) => s.notify);
   const [editing, setEditing] = useState(null);
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState(null);
+  const [statKey, setStatKey] = useState(0);
+  const stats = useStats(base, statKey);
+  const kpis = moduleKpis(mod.module, stats);
   const columns = def.columns;
   const pages = Math.max(1, Math.ceil(rec.total / rec.pageSize));
   const fixed = mod.fixed || {};
@@ -162,7 +251,7 @@ export default function RecordsView({ entity, mod, def, meta }) {
       else await api.post(base, data);
       notify(editing?.id ? 'Saved' : 'Created');
       setEditing(null);
-      rec.reload();
+      rec.reload(); setStatKey((k) => k + 1);
     } catch (e) {
       setErrors(e.details || null);
       notify(e.message, 'error');
@@ -171,7 +260,7 @@ export default function RecordsView({ entity, mod, def, meta }) {
   const remove = async () => {
     if (!editing?.id) return;
     setBusy(true);
-    try { await api.del(`${base}/${editing.id}`); notify('Deleted'); setEditing(null); rec.reload(); }
+    try { await api.del(`${base}/${editing.id}`); notify('Deleted'); setEditing(null); rec.reload(); setStatKey((k) => k + 1); }
     catch (e) { notify(e.message, 'error'); } finally { setBusy(false); }
   };
   const setSort = (key) => rec.setParams((p) => ({ ...p, page: 1, sort: p.sort === key ? `-${key}` : key }));
@@ -208,6 +297,12 @@ export default function RecordsView({ entity, mod, def, meta }) {
           {leadKpis.cats.length < 2 && <Kpi label="Pipeline Stages" value={meta.stages.length} sub="Configured for this entity" tone="purple" />}
           {leadKpis.cats.length < 1 && <Kpi label="Active" value={leadKpis.total - leadKpis.won} sub="Not yet signed" tone="orange" />}
           <Kpi label="Contracts Signed" value={leadKpis.won} sub="Closed deals" tone="green" />
+        </div>
+      )}
+
+      {kpis && (
+        <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {kpis.map((k) => <Kpi key={k.label} label={k.label} value={k.value} sub={k.sub} tone={k.tone} />)}
         </div>
       )}
 
@@ -253,6 +348,12 @@ export default function RecordsView({ entity, mod, def, meta }) {
         <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2 xl:grid-cols-3">
           {rec.data.map((u) => (
             <UnitCard key={u.id} u={u} canEdit={mod.can.edit} onOpen={() => mod.can.edit && setEditing(u)} leadsHref={leadsMod ? `/e/${entity.code}/${leadsMod.slug}` : null} />
+          ))}
+        </div>
+      ) : isCx ? (
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {rec.data.map((f) => (
+            <FeedbackCard key={f.id} f={f} meta={meta} canEdit={mod.can.edit} onOpen={() => mod.can.edit && setEditing(f)} />
           ))}
         </div>
       ) : (

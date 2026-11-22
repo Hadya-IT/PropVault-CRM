@@ -84,6 +84,7 @@ export function buildApp({ cfg, logger, verifyIdToken, sessions }) {
       return res.status(err.status).json({ error: { code: err.code, message: err.message, details: err.details } });
     }
     if (err?.type === 'entity.too.large') return res.status(413).json({ error: { code: 'too_large', message: 'Request too large' } });
+    if (err?.type === 'entity.parse.failed' || err instanceof SyntaxError) return res.status(400).json({ error: { code: 'bad_request', message: 'Invalid JSON body' } });
     req.log?.error({ err }, 'unhandled error');
     res.status(500).json({ error: { code: 'server_error', message: 'Something went wrong', requestId: req.id } });
   });

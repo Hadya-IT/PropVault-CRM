@@ -11,6 +11,7 @@
 // Idempotent: rows are matched on SOURCE='CAPSULE' + EXTERNAL_ID, so running it again updates instead of duplicating.
 import 'dotenv/config';
 import oracledb from 'oracledb';
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 
 // Capsule pipeline name → where it lands in Hadya CRM. Pipelines not listed (HOMCO Sales, AFCO) are skipped.
 const PIPELINES = {
@@ -25,6 +26,10 @@ const ACTIVITY_TYPES = new Set(['call', 'email', 'meeting', 'note', 'task', 'wha
 const args = new Set(process.argv.slice(2));
 const DRY = args.has('--dry');
 const WITH_ACTIVITIES = !args.has('--no-activities');
+const REFRESH = args.has('--refresh');
+// Capsule data is cached locally for 24h so a failed DB write does not cost another ~2,000 Capsule calls.
+// The cache holds customer data: it lives in server/.cache (git-ignored) — delete it after the import.
+const CACHE = new URL('../.cache/capsule.json', import.meta.url);
 const token = process.env.CAPSULE_TOKEN;
 if (!token) { console.error('CAPSULE_TOKEN is missing in server\\.env (see the top of this file).'); process.exit(1); }
 
@@ -64,7 +69,15 @@ async function capAll(path, key) {
   }
 }
 
-const clip = (s, n) => (s == null ? null : String(s).slice(0, n));
+// Oracle VARCHAR2 limits are in BYTES; Arabic text is 2-3 bytes per character, so cut by UTF-8 bytes.
+const clip = (s, n) => {
+  if (s == null) return null;
+  let t = String(s);
+  if (Buffer.byteLength(t, 'utf8') <= n) return t;
+  t = Buffer.from(t, 'utf8').subarray(0, n).toString('utf8');
+  while (Buffer.byteLength(t, 'utf8') > n || t.endsWith('\uFFFD')) t = t.slice(0, -1);
+  return t;
+};
 const partyName = (p) => (p ? (p.type === 'organisation' ? p.name : [p.firstName, p.lastName].filter(Boolean).join(' ') || p.name) : null);
 const toDate = (s) => (s ? new Date(s) : null);
 const lostReasonOf = (o) => (typeof o.lostReason === 'string' ? o.lostReason : o.lostReason?.name) || null;
@@ -119,8 +132,22 @@ async function fetchCapsule() {
   return { pipelines, pipeMilestones, inScope, skipped, parties, entries, tasks, userEmail, total: opps.length };
 }
 
+async function loadData() {
+  if (!REFRESH && existsSync(CACHE) && Date.now() - statSync(CACHE).mtimeMs < 24 * 3600e3) {
+    const c = JSON.parse(readFileSync(CACHE, 'utf8'));
+    if (!WITH_ACTIVITIES || c.withActivities) {
+      console.log('Using cached Capsule data (server/.cache/capsule.json). Add --refresh to read Capsule again.');
+      return { ...c, parties: new Map(c.parties), entries: new Map(c.entries), userEmail: new Map(c.userEmail) };
+    }
+  }
+  const d = await fetchCapsule();
+  mkdirSync(new URL('../.cache/', import.meta.url), { recursive: true });
+  writeFileSync(CACHE, JSON.stringify({ ...d, withActivities: WITH_ACTIVITIES, parties: [...d.parties], entries: [...d.entries], userEmail: [...d.userEmail] }));
+  return d;
+}
+
 async function main() {
-  const data = await fetchCapsule();
+  const data = await loadData();
   const { inScope, parties, entries, tasks } = data;
 
   console.log(`\nCapsule opportunities: ${data.total} total, ${inScope.length} in scope.`);
@@ -240,25 +267,25 @@ async function main() {
           const type = en.type === 'email' ? 'email' : ACTIVITY_TYPES.has(at) ? at : 'note';
           acts.push({ e: l.e, x: `entry:${en.id}`, lid: l.id, cid: l.c, ty: type,
             sub: clip(en.subject || en.activityType?.name || (type === 'email' ? 'Email' : 'Note'), 200),
-            note: clip(String(en.content || '').replace(/\r/g, ''), 4000), due: null, done: 1, uid: userOf(en.creator), ca: toDate(en.entryAt || en.createdAt) || new Date() });
+            note: clip(String(en.content || '').replace(/\r/g, ''), 4000), due: null, done: 1, usr: userOf(en.creator), ca: toDate(en.entryAt || en.createdAt) || new Date() });
         }
       }
       for (const t of tasks) {
         const l = leadOf.get(String(t.opportunity.id)); if (!l) continue;
         acts.push({ e: l.e, x: `task:${t.id}`, lid: l.id, cid: l.c, ty: 'task', sub: clip(t.description || 'Task', 200), note: clip(t.detail, 4000),
-          due: toDate(t.dueOn), done: t.status === 'COMPLETED' || t.status === 'completed' ? 1 : 0, uid: userOf(t.owner), ca: toDate(t.createdAt) || new Date() });
+          due: toDate(t.dueOn), done: t.status === 'COMPLETED' || t.status === 'completed' ? 1 : 0, usr: userOf(t.owner), ca: toDate(t.createdAt) || new Date() });
       }
       if (acts.length) await conn.executeMany(
         `MERGE INTO activities t USING (SELECT :e entity_id, :x external_id FROM dual) s
            ON (t.entity_id = s.entity_id AND t.source = 'CAPSULE' AND t.external_id = s.external_id)
          WHEN MATCHED THEN UPDATE SET t.lead_id = :lid, t.contact_id = :cid, t.activity_type = :ty, t.subject = :sub, t.note = :note,
-              t.due_at = :due, t.done = :done, t.user_id = :uid, t.updated_at = SYSTIMESTAMP, t.row_version = t.row_version + 1
+              t.due_at = :due, t.done = :done, t.user_id = :usr, t.updated_at = SYSTIMESTAMP, t.row_version = t.row_version + 1
          WHEN NOT MATCHED THEN INSERT (entity_id, lead_id, contact_id, activity_type, subject, note, due_at, done, user_id, source, external_id, created_at)
-              VALUES (:e, :lid, :cid, :ty, :sub, :note, :due, :done, :uid, 'CAPSULE', :x, :ca)`,
+              VALUES (:e, :lid, :cid, :ty, :sub, :note, :due, :done, :usr, 'CAPSULE', :x, :ca)`,
         acts, { bindDefs: {
           e: { type: oracledb.NUMBER }, x: { type: oracledb.STRING, maxSize: 100 }, lid: { type: oracledb.NUMBER }, cid: { type: oracledb.NUMBER },
           ty: { type: oracledb.STRING, maxSize: 20 }, sub: { type: oracledb.STRING, maxSize: 200 }, note: { type: oracledb.STRING, maxSize: 4000 },
-          due: { type: oracledb.DATE }, done: { type: oracledb.NUMBER }, uid: { type: oracledb.NUMBER }, ca: { type: oracledb.DATE },
+          due: { type: oracledb.DATE }, done: { type: oracledb.NUMBER }, usr: { type: oracledb.NUMBER }, ca: { type: oracledb.DATE },
         } });
       actCount = acts.length;
     }

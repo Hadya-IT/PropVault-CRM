@@ -6,6 +6,7 @@ import { MODULE_DEFS } from '../modules/defs';
 import RecordsView from '../modules/RecordsView';
 import PipelineView from '../modules/PipelineView';
 import EntityOverview from '../modules/EntityOverview';
+import ReportsView from '../modules/ReportsView';
 import { Empty, PageHeader, Spinner } from '../components/ui';
 
 function useEntityMeta(code) {
@@ -31,6 +32,7 @@ export default function ModulePage() {
 
   if (mod.module === 'overview') return <EntityOverview key={entityCode} entity={entity} mod={mod} />;
   if (mod.module === 'pipeline') return <PipelineView entity={entity} mod={mod} meta={meta} />;
+  if (mod.module === 'reports') return <ReportsView key={`${entityCode}/${slug}`} entity={entity} mod={mod} meta={meta} />;
   if (MODULE_DEFS[mod.module]) return <RecordsView key={`${entityCode}/${slug}`} entity={entity} mod={mod} def={MODULE_DEFS[mod.module]} meta={meta} />;
 
   // reports: week 4; segments/jobs/catalog: phase 2

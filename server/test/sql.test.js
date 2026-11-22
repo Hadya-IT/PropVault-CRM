@@ -82,3 +82,17 @@ test('buildList: id list filter becomes IN with binds', () => {
   assert.match(r.sql, /t\.stage_id IN \(:f\d+,:f\d+,:f\d+\)/);
   assert.throws(() => buildList(def, { entityId: 1, filters: { stage_id: '4,x' } }));
 });
+
+test('buildStats: money sum + avg score, values are bound', async () => {
+  const { buildStats } = await import('../src/modules/sql.js');
+  const leads = MODULES.leads;
+  const r = buildStats(leads, { entityId: 5, fixed: { category: 'Office' } });
+  assert.match(r.sql, /COUNT\(\*\) AS cnt/);
+  assert.match(r.sql, /SUM\(t\.value_amount\) AS sum_value_amount/);
+  assert.match(r.sql, /ROUND\(AVG\(t\.score\),1\) AS avg_score/);
+  assert.ok(r.sums.includes('value_amount'));
+  assert.equal(r.binds.entityId, 5);
+  assert.equal(r.binds.x0, 'Office');
+  // no raw value interpolation
+  assert.ok(!r.sql.includes('Office'));
+});

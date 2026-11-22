@@ -211,6 +211,30 @@ export function buildSoftDelete(def, { entityId, id }) {
   };
 }
 
+/**
+ * Scalar aggregates for a module within its fixed filter: row count, SUM of each money/number
+ * column, AVG of score. Column list comes from `def` (whitelist); every value is a bind.
+ */
+export function buildStats(def, { entityId, fixed = {} }) {
+  const binds = { entityId };
+  const where = ['t.entity_id = :entityId', 't.deleted_at IS NULL'];
+  let i = 0;
+  for (const [k, v] of Object.entries(fixed)) {
+    if (!def.columns[k]) throw badRequest(`Bad fixed filter ${k}`);
+    binds[`x${i}`] = v; where.push(`t.${k} = :x${i}`); i++;
+  }
+  const aggs = ['COUNT(*) AS cnt'];
+  const sums = [];
+  for (const [name, col] of Object.entries(def.columns)) {
+    if (!col.list) continue;
+    if (col.type === 'number' || (col.type === 'int' && name !== 'score')) {
+      if (col.format === 'money' || /amount|rent|mrr|total|value/.test(name)) { aggs.push(`SUM(t.${name}) AS sum_${name}`); sums.push(name); }
+    }
+    if (name === 'score') aggs.push(`ROUND(AVG(t.${name}),1) AS avg_score`);
+  }
+  return { sql: `SELECT ${aggs.join(', ')} FROM ${def.table} t WHERE ${where.join(' AND ')}`, binds, sums };
+}
+
 /** Counts per value of one filterable column, within the module's fixed filter. Used for tab counts. */
 export function buildFacet(def, { entityId, fixed = {}, column }) {
   const col = def.columns[column];
