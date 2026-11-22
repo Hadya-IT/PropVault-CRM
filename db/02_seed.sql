@@ -1,0 +1,185 @@
+-- PropVault CRM seed data. Generated from the HTML prototype's ENTITY_NAV and PIPELINES.
+-- Entities/modules below are only a starting setup; admins change them in the UI.
+
+-- Module library (code-defined)
+INSERT INTO modules (code,name,description,phase) VALUES ('overview','Entity Overview','KPI dashboard per entity, widgets from config',1);
+INSERT INTO modules (code,name,description,phase) VALUES ('units','Units / Inventory','Offices, retail, apartments, coworking spaces',1);
+INSERT INTO modules (code,name,description,phase) VALUES ('leads','Leads','Leads with entity-specific fields',1);
+INSERT INTO modules (code,name,description,phase) VALUES ('pipeline','Pipeline','Kanban by entity stages',1);
+INSERT INTO modules (code,name,description,phase) VALUES ('activities','Activities','Calls, meetings, notes, tasks',1);
+INSERT INTO modules (code,name,description,phase) VALUES ('deals','Deals / Contracts','Leases, sales, renewals',1);
+INSERT INTO modules (code,name,description,phase) VALUES ('customers','Customers / Members','Tenants, members, guests',1);
+INSERT INTO modules (code,name,description,phase) VALUES ('bookings','Bookings','Meeting rooms and bookable spaces',1);
+INSERT INTO modules (code,name,description,phase) VALUES ('maintenance','Maintenance','Maintenance requests with SLA',1);
+INSERT INTO modules (code,name,description,phase) VALUES ('events','Events','Community and venue events',1);
+INSERT INTO modules (code,name,description,phase) VALUES ('cx','Customer Experience','NPS, CSAT, complaints',1);
+INSERT INTO modules (code,name,description,phase) VALUES ('reports','Reports & Export','Reports, CSV/Excel/PDF export',1);
+INSERT INTO modules (code,name,description,phase) VALUES ('segments','Segments & Campaigns','Phase 2',2);
+INSERT INTO modules (code,name,description,phase) VALUES ('jobs','Jobs','Phase 2 (catering jobs)',2);
+INSERT INTO modules (code,name,description,phase) VALUES ('catalog','Catalog / Packages','Phase 2 (menus, packages)',2);
+
+-- Role permissions: view, create, edit, delete, export
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('company-owner','overview',1,1,1,1,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('company-owner','units',1,1,1,1,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('company-owner','leads',1,1,1,1,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('company-owner','pipeline',1,1,1,1,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('company-owner','activities',1,1,1,1,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('company-owner','deals',1,1,1,1,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('company-owner','customers',1,1,1,1,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('company-owner','bookings',1,1,1,1,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('company-owner','maintenance',1,1,1,1,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('company-owner','events',1,1,1,1,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('company-owner','cx',1,1,1,1,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('company-owner','reports',1,1,1,1,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('company-owner','segments',1,1,1,1,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('company-owner','jobs',1,1,1,1,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('company-owner','catalog',1,1,1,1,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('dept-manager','overview',1,1,1,0,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('dept-manager','units',1,1,1,0,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('dept-manager','leads',1,1,1,0,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('dept-manager','pipeline',1,1,1,0,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('dept-manager','activities',1,1,1,0,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('dept-manager','deals',1,1,1,0,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('dept-manager','customers',1,1,1,0,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('dept-manager','bookings',1,1,1,0,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('dept-manager','maintenance',1,1,1,0,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('dept-manager','events',1,1,1,0,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('dept-manager','cx',1,1,1,0,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('dept-manager','reports',1,1,1,0,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('dept-manager','segments',1,1,1,0,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('dept-manager','jobs',1,1,1,0,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('dept-manager','catalog',1,1,1,0,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('sales-agent','overview',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('sales-agent','units',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('sales-agent','leads',1,1,1,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('sales-agent','pipeline',1,1,1,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('sales-agent','activities',1,1,1,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('sales-agent','deals',1,1,1,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('sales-agent','customers',1,1,1,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('sales-agent','bookings',1,1,1,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('sales-agent','cx',1,1,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('sales-agent','reports',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('marketing','overview',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('marketing','units',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('marketing','leads',1,1,1,0,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('marketing','pipeline',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('marketing','activities',1,1,1,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('marketing','customers',1,0,0,0,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('marketing','events',1,1,1,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('marketing','cx',1,1,1,0,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('marketing','reports',1,0,0,0,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('marketing','segments',1,1,1,0,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('operation','overview',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('operation','units',1,1,1,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('operation','customers',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('operation','bookings',1,1,1,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('operation','maintenance',1,1,1,0,1);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('operation','events',1,1,1,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('operation','cx',1,1,1,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('operation','reports',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('viewer','overview',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('viewer','units',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('viewer','leads',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('viewer','pipeline',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('viewer','activities',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('viewer','deals',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('viewer','customers',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('viewer','bookings',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('viewer','maintenance',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('viewer','events',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('viewer','cx',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('viewer','reports',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('viewer','segments',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('viewer','jobs',1,0,0,0,0);
+INSERT INTO role_permissions (role,module_code,can_view,can_create,can_edit,can_delete,can_export) VALUES ('viewer','catalog',1,0,0,0,0);
+
+-- Starting entities (Phase 1)
+INSERT INTO entities (code,name,industry,color,city,sort_order) VALUES ('JS','Jameel Square','Commercial Real Estate','amber','Jeddah',1);
+INSERT INTO entities (code,name,industry,color,city,sort_order) VALUES ('SLO','SOLO','Residential Apartments','lime','Jeddah',2);
+INSERT INTO entities (code,name,industry,color,city,sort_order) VALUES ('GRV','GRAVITA','Co-Working Space','violet','Jeddah',3);
+
+-- Entity module assignments
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'overview','overview','JS Overview',10,NULL FROM entities WHERE code='JS';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'units','office-units','Office Units',20,'{"category":"Office"}' FROM entities WHERE code='JS';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'units','retail-showrooms','Retail Showrooms',30,'{"category":"Retail"}' FROM entities WHERE code='JS';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'leads','leasing-leads','Leasing Leads',40,NULL FROM entities WHERE code='JS';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'pipeline','pipeline','Pipeline',50,NULL FROM entities WHERE code='JS';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'activities','activities','Activities',60,NULL FROM entities WHERE code='JS';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'deals','deals','Deals',70,NULL FROM entities WHERE code='JS';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'cx','customer-experience','Customer Experience',80,NULL FROM entities WHERE code='JS';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'reports','reports','Reports & Export',90,NULL FROM entities WHERE code='JS';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'overview','overview','SOLO Overview',10,NULL FROM entities WHERE code='SLO';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'units','apartment-units','Apartment Units',20,'{"category":"Apartment"}' FROM entities WHERE code='SLO';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'leads','tenant-leads','Tenant Leads',30,NULL FROM entities WHERE code='SLO';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'maintenance','maintenance','Maintenance',40,NULL FROM entities WHERE code='SLO';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'pipeline','pipeline','Pipeline',50,NULL FROM entities WHERE code='SLO';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'activities','activities','Activities',60,NULL FROM entities WHERE code='SLO';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'cx','customer-experience','Customer Experience',70,NULL FROM entities WHERE code='SLO';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'reports','reports','Reports & Export',80,NULL FROM entities WHERE code='SLO';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'overview','overview','GRV Overview',10,NULL FROM entities WHERE code='GRV';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'units','spaces','Spaces & Units',20,'{"category":"Space"}' FROM entities WHERE code='GRV';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'customers','members','Members',30,NULL FROM entities WHERE code='GRV';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'bookings','bookings','Bookings',40,NULL FROM entities WHERE code='GRV';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'events','events','Events',50,NULL FROM entities WHERE code='GRV';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'leads','membership-leads','Membership Leads',60,NULL FROM entities WHERE code='GRV';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'pipeline','pipeline','Pipeline',70,NULL FROM entities WHERE code='GRV';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'activities','activities','Activities',80,NULL FROM entities WHERE code='GRV';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'cx','customer-experience','Customer Experience',90,NULL FROM entities WHERE code='GRV';
+INSERT INTO entity_modules (entity_id,module_code,slug,label,sort_order,filter_config) SELECT id,'reports','reports','Reports & Export',100,NULL FROM entities WHERE code='GRV';
+
+-- Pipeline stages
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Inquiry',10,'slate',0,0 FROM entities WHERE code='JS';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Requirements Gathering',20,'sky',0,0 FROM entities WHERE code='JS';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Site Visit',30,'blue',0,0 FROM entities WHERE code='JS';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Proposal Sent',40,'indigo',0,0 FROM entities WHERE code='JS';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Negotiation',50,'violet',0,0 FROM entities WHERE code='JS';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'LOI Signed',60,'amber',0,0 FROM entities WHERE code='JS';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Contract Signed',70,'emerald',1,0 FROM entities WHERE code='JS';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Fitout Stage',80,'teal',0,0 FROM entities WHERE code='JS';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Handover',90,'cyan',0,0 FROM entities WHERE code='JS';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Occupied',100,'green',0,0 FROM entities WHERE code='JS';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Inquiry',10,'slate',0,0 FROM entities WHERE code='SLO';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Viewing',20,'sky',0,0 FROM entities WHERE code='SLO';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Proposal Sent',30,'blue',0,0 FROM entities WHERE code='SLO';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Negotiation',40,'indigo',0,0 FROM entities WHERE code='SLO';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Contract Signed',50,'violet',1,0 FROM entities WHERE code='SLO';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Move-in Ready',60,'amber',0,0 FROM entities WHERE code='SLO';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Occupied',70,'emerald',0,0 FROM entities WHERE code='SLO';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Renewal Notice',80,'teal',0,0 FROM entities WHERE code='SLO';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Vacated',90,'cyan',0,1 FROM entities WHERE code='SLO';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Inquiry',10,'slate',0,0 FROM entities WHERE code='GRV';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Tour Booked',20,'sky',0,0 FROM entities WHERE code='GRV';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Tour Completed',30,'blue',0,0 FROM entities WHERE code='GRV';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Proposal Sent',40,'indigo',0,0 FROM entities WHERE code='GRV';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Negotiation',50,'violet',0,0 FROM entities WHERE code='GRV';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Contract Signed',60,'amber',1,0 FROM entities WHERE code='GRV';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Onboarded',70,'emerald',0,0 FROM entities WHERE code='GRV';
+INSERT INTO entity_stages (entity_id,name,sort_order,color,is_won,is_lost) SELECT id,'Churned',80,'teal',0,1 FROM entities WHERE code='GRV';
+
+-- Dashboard widgets
+INSERT INTO dash_widgets (entity_id,widget_code,config,sort_order) VALUES (NULL,'total_leads',NULL,10);
+INSERT INTO dash_widgets (entity_id,widget_code,config,sort_order) VALUES (NULL,'pipeline_value',NULL,20);
+INSERT INTO dash_widgets (entity_id,widget_code,config,sort_order) VALUES (NULL,'revenue_won',NULL,30);
+INSERT INTO dash_widgets (entity_id,widget_code,config,sort_order) VALUES (NULL,'conversion_rate',NULL,40);
+INSERT INTO dash_widgets (entity_id,widget_code,config,sort_order) VALUES (NULL,'avg_score',NULL,50);
+INSERT INTO dash_widgets (entity_id,widget_code,config,sort_order) VALUES (NULL,'open_issues',NULL,60);
+INSERT INTO dash_widgets (entity_id,widget_code,config,sort_order) SELECT id,'occupancy','{"category":"Office"}',10 FROM entities WHERE code='JS';
+INSERT INTO dash_widgets (entity_id,widget_code,config,sort_order) SELECT id,'occupancy','{"category":"Retail"}',20 FROM entities WHERE code='JS';
+INSERT INTO dash_widgets (entity_id,widget_code,config,sort_order) SELECT id,'annual_rent',NULL,30 FROM entities WHERE code='JS';
+INSERT INTO dash_widgets (entity_id,widget_code,config,sort_order) SELECT id,'active_leads',NULL,40 FROM entities WHERE code='JS';
+INSERT INTO dash_widgets (entity_id,widget_code,config,sort_order) SELECT id,'contracts_signed',NULL,50 FROM entities WHERE code='JS';
+INSERT INTO dash_widgets (entity_id,widget_code,config,sort_order) SELECT id,'occupancy','{"category":"Apartment"}',10 FROM entities WHERE code='SLO';
+INSERT INTO dash_widgets (entity_id,widget_code,config,sort_order) SELECT id,'monthly_rent',NULL,20 FROM entities WHERE code='SLO';
+INSERT INTO dash_widgets (entity_id,widget_code,config,sort_order) SELECT id,'nps',NULL,30 FROM entities WHERE code='SLO';
+INSERT INTO dash_widgets (entity_id,widget_code,config,sort_order) SELECT id,'active_leads',NULL,40 FROM entities WHERE code='SLO';
+INSERT INTO dash_widgets (entity_id,widget_code,config,sort_order) SELECT id,'open_maintenance',NULL,50 FROM entities WHERE code='SLO';
+INSERT INTO dash_widgets (entity_id,widget_code,config,sort_order) SELECT id,'active_members',NULL,10 FROM entities WHERE code='GRV';
+INSERT INTO dash_widgets (entity_id,widget_code,config,sort_order) SELECT id,'mrr',NULL,20 FROM entities WHERE code='GRV';
+INSERT INTO dash_widgets (entity_id,widget_code,config,sort_order) SELECT id,'nps',NULL,30 FROM entities WHERE code='GRV';
+INSERT INTO dash_widgets (entity_id,widget_code,config,sort_order) SELECT id,'active_leads',NULL,40 FROM entities WHERE code='GRV';
+INSERT INTO dash_widgets (entity_id,widget_code,config,sort_order) SELECT id,'bookings_upcoming',NULL,50 FROM entities WHERE code='GRV';
+
+-- Bootstrap admin: replace the email before running. Everyone else is added from the Admin screen.
+INSERT INTO app_users (email,display_name,global_role) VALUES (LOWER('&BOOTSTRAP_ADMIN_EMAIL'),'System Admin','group-owner');
+
+COMMIT;
